@@ -29,8 +29,11 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    // db name
     const carDoctorDB = client.db("carDoctorDB");
+    // db collection
     const serviceCollection = carDoctorDB.collection("services");
+    const serviceAppointment = carDoctorDB.collection("appointment");
 
     // get services data from db
     app.get("/services", async (req, res) => {
@@ -44,6 +47,32 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const service = await serviceCollection.findOne(query);
       res.send(service);
+    });
+
+    // service appointment operation
+
+    // send appointInfo to db
+    app.post("/appointment", async (req, res) => {
+      const appointInfo = req.body;
+      const result = await serviceAppointment.insertOne(appointInfo);
+      res.send(result);
+    });
+
+    // get appointInfo by user uid
+    app.get("/appointment", async (req, res) => {
+      let query = {};
+      if (req.query?.uid) {
+        query = { user_id: req.query?.uid };
+      }
+      const appointInfo = await serviceAppointment.find(query).toArray();
+      res.send(appointInfo);
+    });
+    // delete appointment
+    app.delete("/appointment/:_id", async (req, res) => {
+      const id = req.params._id;
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceAppointment.deleteOne(query);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
