@@ -67,6 +67,21 @@ async function run() {
       const appointInfo = await serviceAppointment.find(query).toArray();
       res.send(appointInfo);
     });
+
+    // update appointment
+    app.patch("/appointment/:_id", async (req, res) => {
+      const id = req.params._id;
+      const statusUpdate = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedInfo = {
+        $set: {
+          status: statusUpdate.status,
+        },
+      };
+      const result = await serviceAppointment.updateOne(filter, updatedInfo);
+      res.send(result);
+    });
+
     // delete appointment
     app.delete("/appointment/:_id", async (req, res) => {
       const id = req.params._id;
