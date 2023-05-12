@@ -10,7 +10,12 @@ const AppointmentInfo = () => {
 
   const url = `http://localhost:5050/appointment?uid=${user.uid}`;
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${localStorage.getItem("car-access-token")}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => setAppointInfo(data));
   }, [url]);

@@ -18,7 +18,7 @@ const SignIn = () => {
       .then((result) => {
         const user = result.user;
         const userInfo = {
-          email: user.email,
+          uid: user.uid,
         };
         fetch(`http://localhost:5050/jwt`, {
           method: "POST",
