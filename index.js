@@ -19,19 +19,37 @@ app.get("/", (req, res) => {
 const verifyJwt = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
-    res.status(401).send({ error: true, message: "Authorization required" });
+    return res
+      .status(401)
+      .send({ error: true, message: "Authorization required" });
   }
   const token = authorization.split(" ")[1];
   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
     if (error) {
-      res
-        .status(402)
+      return res
+        .status(403)
         .send({ error: true, message: "Token verification failed" });
     }
     req.decoded = decode;
     next();
   });
 };
+// const verifyJwt = (req, res, next) => {
+//   const authorization = req.headers.authorization;
+//   if (!authorization) {
+//     res.status(401).send({ error: true, message: "Authorization required" });
+//   }
+//   const token = authorization.split(" ")[1];
+//   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
+//     if (error) {
+//       res
+//         .status(402)
+//         .send({ error: true, message: "Token verification failed" });
+//     }
+//     req.decoded = decode;
+//     next();
+//   });
+// };
 
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.beeiwwt.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -89,6 +107,7 @@ async function run() {
 
     // get appointInfo by user uid
     app.get("/appointment", verifyJwt, async (req, res) => {
+      console.log("after verifyJwt", req.decoded);
       let query = {};
       if (req.query?.uid) {
         query = { user_id: req.query?.uid };
