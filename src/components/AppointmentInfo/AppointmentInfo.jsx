@@ -11,7 +11,12 @@ const AppointmentInfo = () => {
   const navigate = useNavigate();
   const url = `http://localhost:5050/appointment?uid=${user.uid}`;
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      method: "GET",
+      headers: {
+        authentication: `Bearer ${localStorage.getItem("car-access-token")}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         if (!data.error) {
@@ -76,7 +81,7 @@ const AppointmentInfo = () => {
     <div>
       <CheckoutBanner title="Appointment Details" pathName="Appoint" />
       <div className="my-20 space-y-6">
-        {appointInfo.map((appoint) => (
+        {appointInfo?.map((appoint) => (
           <InfoCard
             handleDelete={handleDelete}
             handleConfirm={handleConfirmStatus}

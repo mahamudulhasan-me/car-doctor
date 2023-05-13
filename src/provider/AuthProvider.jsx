@@ -43,7 +43,7 @@ const AuthProvider = ({ children }) => {
       const userInfo = {
         uid: currentUser.uid,
       };
-      if (currentUser && currentUser?.uid) {
+      if (user && currentUser?.uid) {
         fetch(`http://localhost:5050/jwt`, {
           method: "POST",
           headers: {
@@ -55,6 +55,8 @@ const AuthProvider = ({ children }) => {
           .then((data) => {
             localStorage.setItem("car-access-token", data.token);
           });
+      } else {
+        localStorage.removeItem("car-access-token");
       }
       setLoader(false);
       return () => unsubscribe;
