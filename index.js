@@ -11,24 +11,20 @@ const port = process.env.PORT || 5050;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Doctor is running!");
-});
-
 // verify jwt
-const verifyJwt = (req, res, next) => {
-  const authorization = req.headers.authorization;
-  if (!authorization) {
+const verifyJWT = (req, res, next) => {
+  const authentication = req.headers.authentication;
+  if (!authentication) {
     return res
       .status(401)
-      .send({ error: true, message: "Authorization required" });
+      .send({ error: true, message: "UnAuthorized Access" });
   }
-  const token = authorization.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
-    if (error) {
+  const token = authentication.split(" ")[1];
+  jwt.verify(token, process.env.JWT_SIGNATURE, (err, decode) => {
+    if (err) {
       return res
         .status(403)
-        .send({ error: true, message: "Token verification failed" });
+        .send({ error: true, message: "UnAuthorized Access" });
     }
     req.decoded = decode;
     next();
@@ -37,13 +33,15 @@ const verifyJwt = (req, res, next) => {
 // const verifyJwt = (req, res, next) => {
 //   const authorization = req.headers.authorization;
 //   if (!authorization) {
-//     res.status(401).send({ error: true, message: "Authorization required" });
+//     return res
+//       .status(401)
+//       .send({ error: true, message: "Authorization required" });
 //   }
 //   const token = authorization.split(" ")[1];
 //   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
 //     if (error) {
-//       res
-//         .status(402)
+//       return res
+//         .status(403)
 //         .send({ error: true, message: "Token verification failed" });
 //     }
 //     req.decoded = decode;
@@ -51,6 +49,9 @@ const verifyJwt = (req, res, next) => {
 //   });
 // };
 
+app.get("/", (req, res) => {
+  res.send("Doctor is running!");
+});
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.beeiwwt.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -75,12 +76,13 @@ async function run() {
 
     // jwt-operations
     app.post("/jwt", (req, res) => {
-      const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+      const payLoad = req.body;
+      const token = jwt.sign(payLoad, process.env.JWT_SIGNATURE, {
         expiresIn: "1h",
       });
       res.send({ token });
     });
+
     // SERVICE
     // get services data from db
     app.get("/services", async (req, res) => {
@@ -106,8 +108,19 @@ async function run() {
     });
 
     // get appointInfo by user uid
-    app.get("/appointment", verifyJwt, async (req, res) => {
-      console.log("after verifyJwt", req.decoded);
+    app.get("/appointment", verifyJWT, async (req, res) => {
+      const decodedInfo = req.decoded;
+      if (decodedInfo.uid !== req.query?.uid) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden Access" });
+      }
+      // const decodedInfo = req.decoded;
+      // if (decodedInfo.uid !== req.query?.uid) {
+      //   return res
+      //     .status(403)
+      //     .send({ error: true, message: "Forbidden Access" });
+      // }
       let query = {};
       if (req.query?.uid) {
         query = { user_id: req.query?.uid };
