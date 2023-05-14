@@ -23,10 +23,17 @@ async function run() {
     await client.connect();
     const carDoctorDB = client.db("carDoctorDB");
     const featureCollection = carDoctorDB.collection("coreFeatures");
+    const teamCollection = carDoctorDB.collection("teamMembers");
 
     adminRoute.post("/features", async (req, res) => {
       const features = req.body;
       const result = await featureCollection.insertOne(features);
+      res.send(result);
+    });
+
+    adminRoute.post("/team", async (req, res) => {
+      const features = req.body;
+      const result = await teamCollection.insertOne(features);
       res.send(result);
     });
 

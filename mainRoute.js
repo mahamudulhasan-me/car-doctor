@@ -68,6 +68,7 @@ async function run() {
     const serviceCollection = carDoctorDB.collection("services");
     const serviceAppointment = carDoctorDB.collection("appointment");
     const featureCollection = carDoctorDB.collection("coreFeatures");
+    const teamCollection = carDoctorDB.collection("teamMembers");
 
     // jwt-operations
     mainRoute.post("/jwt", (req, res) => {
@@ -151,6 +152,10 @@ async function run() {
     //get core features
     mainRoute.get("/features", async (req, res) => {
       const result = await featureCollection.find().toArray();
+      res.send(result);
+    });
+    mainRoute.get("/team", async (req, res) => {
+      const result = await teamCollection.find().toArray();
       res.send(result);
     });
 
